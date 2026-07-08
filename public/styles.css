@@ -311,12 +311,19 @@ select {
   border-spacing: 0;
 }
 
+.myui-table *,
+.myui-table *::before,
+.myui-table *::after {
+  box-sizing: border-box;
+}
+
 .myui-table th,
 .myui-table td {
   padding: 11px 14px;
   border-bottom: 1px solid var(--border-light);
   text-align: left;
   vertical-align: middle;
+  min-width: 0;
 }
 
 .myui-table th {
@@ -361,6 +368,13 @@ select {
   table-layout: fixed;
 }
 
+.myui-alert-table th,
+.myui-alert-table td,
+.myui-latest-table th,
+.myui-latest-table td {
+  padding: 10px 10px;
+}
+
 .myui-alert-table th:nth-child(1),
 .myui-alert-table td:nth-child(1) {
   width: 126px;
@@ -398,11 +412,19 @@ select {
 
 .myui-latest-table th:nth-child(4),
 .myui-latest-table td:nth-child(4) {
-  width: 96px;
+  width: 130px;
 }
 
 .myui-visual-table {
   min-width: 0;
+}
+
+.myui-alert-table .myui-value-pill,
+.myui-latest-table .myui-value-pill {
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  padding: 4px 6px;
 }
 
 .myui-cell-time {
@@ -410,6 +432,8 @@ select {
   color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .myui-cell-room {
@@ -417,6 +441,8 @@ select {
   color: var(--accent-hover);
   font-weight: 650;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .myui-cell-host {
@@ -425,23 +451,28 @@ select {
   font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
   font-size: 12px;
   white-space: normal;
+  overflow: hidden;
 }
 
 .myui-cell-metric {
   min-width: 0;
   color: var(--text-primary);
   white-space: normal;
+  overflow: hidden;
 }
 
 .myui-cell-value {
   width: 96px;
   text-align: right;
   white-space: nowrap;
+  overflow: hidden;
 }
 
 .myui-cell-reason {
   width: 112px;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .myui-cell-bar {
@@ -459,6 +490,7 @@ select {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  width: 100%;
   min-width: 0;
   overflow: hidden;
 }
@@ -483,6 +515,16 @@ select {
 
 .myui-metric-name {
   color: var(--text-primary);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.myui-alert-table .myui-metric-name,
+.myui-latest-table .myui-metric-name {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .myui-value-pill {
@@ -490,7 +532,7 @@ select {
   align-items: baseline;
   justify-content: flex-end;
   flex-wrap: nowrap;
-  min-width: 82px;
+  min-width: 74px;
   max-width: 100%;
   padding: 4px 8px;
   border: 1px solid hsl(40 74% 55% / 0.18);
@@ -503,6 +545,13 @@ select {
   line-height: 1.2;
   text-align: right;
   white-space: nowrap;
+  overflow: hidden;
+}
+
+.myui-value-pill > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .myui-value-unit {
@@ -511,12 +560,14 @@ select {
   font-size: 11px;
   font-weight: 500;
   white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 .myui-bar-cell {
   display: grid;
   gap: 6px;
   min-width: 110px;
+  width: 100%;
 }
 
 .myui-bar-meta {
@@ -537,29 +588,38 @@ select {
 }
 
 .myui-bar-track {
-  height: 7px;
+  display: block;
+  width: 100%;
+  height: 9px;
   overflow: hidden;
+  border: 1px solid hsl(40 20% 70% / 0.08);
   border-radius: 999px;
-  background: hsl(30 10% 20% / 0.68);
+  background: hsl(30 10% 24% / 0.86);
+  box-shadow: inset 0 1px 2px hsl(0 0% 0% / 0.35);
 }
 
 .myui-bar-fill {
+  display: block;
   width: 0;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+  background: linear-gradient(90deg, hsl(30 74% 48%), hsl(25 88% 62%));
+  box-shadow: 0 0 10px hsl(25 88% 58% / 0.28);
 }
 
 .myui-bar-fill-blue {
-  background: linear-gradient(90deg, hsl(188 32% 44%), var(--blue));
+  background: linear-gradient(90deg, hsl(188 42% 42%), hsl(188 56% 66%));
+  box-shadow: 0 0 10px hsl(188 56% 62% / 0.26);
 }
 
 .myui-bar-fill-purple {
-  background: linear-gradient(90deg, hsl(316 22% 46%), var(--purple));
+  background: linear-gradient(90deg, hsl(316 30% 48%), hsl(316 46% 68%));
+  box-shadow: 0 0 10px hsl(316 46% 64% / 0.24);
 }
 
 .myui-bar-fill-red {
-  background: linear-gradient(90deg, hsl(6 66% 46%), var(--error));
+  background: linear-gradient(90deg, hsl(6 66% 48%), hsl(6 84% 66%));
+  box-shadow: 0 0 10px hsl(6 84% 62% / 0.24);
 }
 
 .myui-tag {
@@ -576,15 +636,25 @@ select {
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .myui-tag::before {
   content: "";
+  flex: 0 0 auto;
   width: 6px;
   height: 6px;
   border-radius: 999px;
   background: currentColor;
   opacity: 0.9;
+}
+
+.myui-tag-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .myui-tag-warning {

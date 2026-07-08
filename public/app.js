@@ -259,6 +259,7 @@ function createBarCell(value, maxValue, unit = "", fillClass = "") {
   const fill = document.createElement("span");
   fill.className = ["myui-bar-fill", fillClass].filter(Boolean).join(" ");
   fill.style.width = `${percent}%`;
+  fill.style.minWidth = numericValue > 0 ? "10px" : "0";
   track.appendChild(fill);
   cell.appendChild(track);
 
@@ -277,7 +278,7 @@ function renderCellContent(td, column, row) {
   if (column.tag) {
     const span = document.createElement("span");
     span.className = ["myui-tag", column.tagClass?.(row)].filter(Boolean).join(" ");
-    span.textContent = content;
+    appendText(span, "myui-tag-text", content);
     td.appendChild(span);
   } else if (content && typeof content === "object" && "nodeType" in content) {
     td.appendChild(content);
@@ -328,7 +329,7 @@ function renderRoomSummary(rows) {
   const maxWait = Math.max(...rows.map((row) => Number(row.cpu_wait) || 0), 1);
   renderTable("roomSummaryBody", rows, [
     { label: "机房", className: "myui-cell-room", render: (row) => row.room },
-    { label: "主机", className: "myui-cell-value", render: (row) => createBarCell(row.host_count, 8, "台", "myui-bar-fill-blue") },
+    { label: "主机", className: "myui-cell-bar", render: (row) => createBarCell(row.host_count, 8, "台", "myui-bar-fill-blue") },
     { label: "CPU", className: "myui-cell-bar", render: (row) => createBarCell(row.cpu_usage, maxCpu, "%") },
     { label: "IO wait", className: "myui-cell-bar", render: (row) => createBarCell(row.cpu_wait, maxWait, "%", "myui-bar-fill-purple") }
   ], "暂无机房汇总数据");
