@@ -225,6 +225,14 @@ select {
   gap: var(--spacing-lg);
 }
 
+.myui-visual-table-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.myui-visual-table-grid .myui-panel,
 .myui-table-grid .myui-panel {
   overflow: hidden;
 }
@@ -275,6 +283,10 @@ select {
   box-shadow: inset 0 1px 0 hsl(40 20% 91% / 0.04);
   scrollbar-color: var(--border-color) transparent;
   scrollbar-width: thin;
+}
+
+.myui-visual-table-wrap {
+  max-height: 280px;
 }
 
 .myui-table-wrap::-webkit-scrollbar {
@@ -340,51 +352,100 @@ select {
 }
 
 .myui-alert-table {
-  min-width: 920px;
+  min-width: 0;
+  table-layout: fixed;
 }
 
 .myui-latest-table {
-  min-width: 760px;
+  min-width: 0;
+  table-layout: fixed;
+}
+
+.myui-alert-table th:nth-child(1),
+.myui-alert-table td:nth-child(1) {
+  width: 126px;
+}
+
+.myui-alert-table th:nth-child(2),
+.myui-alert-table td:nth-child(2) {
+  width: 64px;
+}
+
+.myui-alert-table th:nth-child(3),
+.myui-alert-table td:nth-child(3) {
+  width: 152px;
+}
+
+.myui-alert-table th:nth-child(5),
+.myui-alert-table td:nth-child(5) {
+  width: 96px;
+}
+
+.myui-alert-table th:nth-child(6),
+.myui-alert-table td:nth-child(6) {
+  width: 112px;
+}
+
+.myui-latest-table th:nth-child(1),
+.myui-latest-table td:nth-child(1) {
+  width: 64px;
+}
+
+.myui-latest-table th:nth-child(2),
+.myui-latest-table td:nth-child(2) {
+  width: 152px;
+}
+
+.myui-latest-table th:nth-child(4),
+.myui-latest-table td:nth-child(4) {
+  width: 96px;
+}
+
+.myui-visual-table {
+  min-width: 0;
 }
 
 .myui-cell-time {
-  width: 148px;
+  width: 126px;
   color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
 .myui-cell-room {
-  width: 86px;
+  width: 64px;
   color: var(--accent-hover);
   font-weight: 650;
   white-space: nowrap;
 }
 
 .myui-cell-host {
-  width: 210px;
+  width: 152px;
   color: var(--text-secondary);
   font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
   font-size: 12px;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .myui-cell-metric {
-  min-width: 240px;
-  max-width: 360px;
+  min-width: 0;
   color: var(--text-primary);
   white-space: normal;
 }
 
 .myui-cell-value {
-  width: 110px;
+  width: 96px;
   text-align: right;
   white-space: nowrap;
 }
 
 .myui-cell-reason {
-  width: 132px;
+  width: 112px;
   white-space: nowrap;
+}
+
+.myui-cell-bar {
+  min-width: 130px;
 }
 
 .myui-cell-empty {
@@ -399,11 +460,15 @@ select {
   flex-direction: column;
   gap: 2px;
   min-width: 0;
+  overflow: hidden;
 }
 
 .myui-host-name {
   color: var(--text-primary);
   font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .myui-host-sub,
@@ -411,6 +476,9 @@ select {
   color: var(--text-tertiary);
   font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
   font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .myui-metric-name {
@@ -443,6 +511,55 @@ select {
   font-size: 11px;
   font-weight: 500;
   white-space: nowrap;
+}
+
+.myui-bar-cell {
+  display: grid;
+  gap: 6px;
+  min-width: 110px;
+}
+
+.myui-bar-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11px;
+}
+
+.myui-bar-value {
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.myui-bar-track {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: hsl(30 10% 20% / 0.68);
+}
+
+.myui-bar-fill {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+}
+
+.myui-bar-fill-blue {
+  background: linear-gradient(90deg, hsl(188 32% 44%), var(--blue));
+}
+
+.myui-bar-fill-purple {
+  background: linear-gradient(90deg, hsl(316 22% 46%), var(--purple));
+}
+
+.myui-bar-fill-red {
+  background: linear-gradient(90deg, hsl(6 66% 46%), var(--error));
 }
 
 .myui-tag {
@@ -502,7 +619,7 @@ select {
   box-shadow: inset 3px 0 0 var(--warning);
 }
 
-@media (max-width: 2200px) {
+@media (max-width: 1500px) {
   .myui-table-grid {
     grid-template-columns: 1fr;
   }
@@ -515,6 +632,10 @@ select {
 
   .myui-screen-grid {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .myui-visual-table-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -538,6 +659,7 @@ select {
 
   .myui-kpi-grid,
   .myui-screen-grid,
+  .myui-visual-table-grid,
   .myui-table-grid {
     grid-template-columns: 1fr;
   }

@@ -106,6 +106,73 @@
         </article>
       </section>
 
+      <section class="myui-visual-table-grid" aria-label="可视化明细表">
+        <article class="myui-panel">
+          <div class="myui-panel-header">
+            <div>
+              <h2>机房运行概览</h2>
+              <p>按机房汇总 CPU、等待和内存</p>
+            </div>
+          </div>
+          <div class="myui-table-wrap myui-visual-table-wrap">
+            <table class="myui-table myui-visual-table">
+              <thead>
+                <tr>
+                  <th scope="col">机房</th>
+                  <th scope="col">主机</th>
+                  <th scope="col">CPU</th>
+                  <th scope="col">IO wait</th>
+                </tr>
+              </thead>
+              <tbody id="roomSummaryBody"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="myui-panel">
+          <div class="myui-panel-header">
+            <div>
+              <h2>主机压力明细</h2>
+              <p>CPU 排名前列主机</p>
+            </div>
+          </div>
+          <div class="myui-table-wrap myui-visual-table-wrap">
+            <table class="myui-table myui-visual-table">
+              <thead>
+                <tr>
+                  <th scope="col">主机</th>
+                  <th scope="col">机房</th>
+                  <th scope="col">CPU</th>
+                  <th scope="col">Load</th>
+                </tr>
+              </thead>
+              <tbody id="hostPressureBody"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="myui-panel">
+          <div class="myui-panel-header">
+            <div>
+              <h2>告警类型统计</h2>
+              <p>最近异常记录按原因归类</p>
+            </div>
+          </div>
+          <div class="myui-table-wrap myui-visual-table-wrap">
+            <table class="myui-table myui-visual-table">
+              <thead>
+                <tr>
+                  <th scope="col">类型</th>
+                  <th scope="col">数量</th>
+                  <th scope="col">峰值</th>
+                </tr>
+              </thead>
+              <tbody id="alertSummaryBody"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
       <section class="myui-table-grid">
         <article class="myui-panel">
           <div class="myui-panel-header">

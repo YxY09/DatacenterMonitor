@@ -242,6 +242,29 @@ function createValuePill(value, unit) {
   return pill;
 }
 
+function createBarCell(value, maxValue, unit = "", fillClass = "") {
+  const cell = document.createElement("span");
+  cell.className = "myui-bar-cell";
+  const numericValue = Number(value) || 0;
+  const numericMax = Math.max(Number(maxValue) || 0, numericValue, 1);
+  const percent = Math.max(0, Math.min(100, (numericValue / numericMax) * 100));
+
+  const meta = document.createElement("span");
+  meta.className = "myui-bar-meta";
+  appendText(meta, "myui-bar-value", `${fmt(numericValue, unit === "台" ? 0 : 2)}${unit ? ` ${unit}` : ""}`);
+  cell.appendChild(meta);
+
+  const track = document.createElement("span");
+  track.className = "myui-bar-track";
+  const fill = document.createElement("span");
+  fill.className = ["myui-bar-fill", fillClass].filter(Boolean).join(" ");
+  fill.style.width = `${percent}%`;
+  track.appendChild(fill);
+  cell.appendChild(track);
+
+  return cell;
+}
+
 function getAlertLevel(row) {
   const reason = row.reason || "";
   if (reason.includes("内存") || reason.includes("利用率")) return "critical";
@@ -298,6 +321,52 @@ function renderTable(tbodyId, rows, columns, emptyText, options = {}) {
     }
   }
   tbody.replaceChildren(fragment);
+}
+
+function renderRoomSummary(rows) {
+  const maxCpu = Math.max(...rows.map((row) => Number(row.cpu_usage) || 0), 1);
+  const maxWait = Math.max(...rows.map((row) => Number(row.cpu_wait) || 0), 1);
+  renderTable("roomSummaryBody", rows, [
+    { label: "机房", className: "myui-cell-room", render: (row) => row.room },
+    { label: "主机", className: "myui-cell-value", render: (row) => createBarCell(row.host_count, 8, "台", "myui-bar-fill-blue") },
+    { label: "CPU", className: "myui-cell-bar", render: (row) => createBarCell(row.cpu_usage, maxCpu, "%") },
+    { label: "IO wait", className: "myui-cell-bar", render: (row) => createBarCell(row.cpu_wait, maxWait, "%", "myui-bar-fill-purple") }
+  ], "暂无机房汇总数据");
+}
+
+function renderHostPressure(rows) {
+  const maxCpu = Math.max(...rows.map((row) => Number(row.cpu_usage) || 0), 1);
+  const maxLoad = Math.max(...rows.map((row) => Number(row.load1) || 0), 1);
+  renderTable("hostPressureBody", rows.slice(0, 8), [
+    { label: "主机", className: "myui-cell-host", render: (row) => createHostCell(row.hostname), title: (row) => row.hostname },
+    { label: "机房", className: "myui-cell-room", render: (row) => row.room },
+    { label: "CPU", className: "myui-cell-bar", render: (row) => createBarCell(row.cpu_usage, maxCpu, "%") },
+    { label: "Load", className: "myui-cell-bar", render: (row) => createBarCell(row.load1, maxLoad, "", "myui-bar-fill-red") }
+  ], "暂无主机排行数据");
+}
+
+function renderAlertSummary(rows) {
+  const summary = Array.from(rows.reduce((map, row) => {
+    const key = row.reason || "其他异常";
+    const item = map.get(key) || { reason: key, count: 0, max_value: 0, unit: row.unit || "" };
+    item.count += 1;
+    item.max_value = Math.max(item.max_value, Number(row.value) || 0);
+    item.unit = item.unit || row.unit || "";
+    map.set(key, item);
+    return map;
+  }, new Map()).values()).sort((a, b) => b.count - a.count);
+  const maxCount = Math.max(...summary.map((row) => row.count), 1);
+  renderTable("alertSummaryBody", summary, [
+    {
+      label: "类型",
+      className: "myui-cell-reason",
+      render: (row) => row.reason,
+      tag: true,
+      tagClass: (row) => `myui-tag-${getAlertLevel(row)}`
+    },
+    { label: "数量", className: "myui-cell-bar", render: (row) => createBarCell(row.count, maxCount, "条", "myui-bar-fill-red") },
+    { label: "峰值", className: "myui-cell-value", render: (row) => createValuePill(row.max_value, row.unit) }
+  ], "暂无告警统计数据");
 }
 
 function renderAlerts(rows) {
@@ -371,6 +440,9 @@ async function refreshDashboard() {
     renderDiskChart(diskTrends);
     renderRoomChart(rooms);
     renderTopHosts(topHosts);
+    renderRoomSummary(rooms);
+    renderHostPressure(topHosts);
+    renderAlertSummary(alerts);
     renderAlerts(alerts);
     renderLatestMetrics(latest);
   } catch (error) {
