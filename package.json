@@ -1,0 +1,27 @@
+{
+  "name": "datacenter-monitor-dashboard",
+  "version": "1.0.0",
+  "description": "数据中心运行监控大屏：四张明细数据导入 MySQL 后进行可视化展示",
+  "main": "src/server.js",
+  "scripts": {
+    "db:up": "docker compose up -d mysql",
+    "db:import": "node scripts/import-data.js",
+    "dev": "node src/server.js",
+    "start": "node src/server.js"
+  },
+  "keywords": [
+    "datacenter",
+    "mysql",
+    "dashboard",
+    "echarts"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "compression": "^1.8.0",
+    "dotenv": "^16.4.7",
+    "echarts": "^6.1.0",
+    "express": "^4.21.2",
+    "mysql2": "^3.12.0"
+  }
+}

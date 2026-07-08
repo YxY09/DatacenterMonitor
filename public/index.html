@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>数据中心运行监控大屏</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="myui-dashboard-shell">
+      <header class="myui-topbar">
+        <section>
+          <p class="myui-eyebrow">Datacenter Monitor</p>
+          <h1>数据中心运行监控大屏</h1>
+        </section>
+        <section class="myui-toolbar" aria-label="筛选和操作">
+          <label class="myui-select-label" for="roomSelect">机房</label>
+          <select id="roomSelect" class="myui-select" aria-label="选择机房">
+            <option value="all">全部机房</option>
+          </select>
+          <button id="refreshBtn" class="myui-icon-action" type="button" aria-label="刷新数据" title="刷新数据">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 12a9 9 0 0 1-15.2 6.5" />
+              <path d="M3 12A9 9 0 0 1 18.2 5.5" />
+              <path d="M18 2v5h-5" />
+              <path d="M6 22v-5h5" />
+            </svg>
+          </button>
+        </section>
+      </header>
+
+      <section id="errorState" class="myui-error-banner myui-hidden" role="alert"></section>
+
+      <section class="myui-kpi-grid" aria-label="核心指标">
+        <article class="myui-kpi-card">
+          <span class="myui-kpi-label">主机数量</span>
+          <strong id="hostCount">--</strong>
+          <small id="roomCount">-- 个机房</small>
+        </article>
+        <article class="myui-kpi-card">
+          <span class="myui-kpi-label">指标数量</span>
+          <strong id="metricCount">--</strong>
+          <small>磁盘 / 性能指标</small>
+        </article>
+        <article class="myui-kpi-card">
+          <span class="myui-kpi-label">近 24h CPU 均值</span>
+          <strong id="cpuAvg">--</strong>
+          <small id="cpuWait">IO wait --</small>
+        </article>
+        <article class="myui-kpi-card">
+          <span class="myui-kpi-label">近 24h 内存均值</span>
+          <strong id="memAvg">--</strong>
+          <small>单位 MB</small>
+        </article>
+        <article class="myui-kpi-card">
+          <span class="myui-kpi-label">磁盘峰值利用率</span>
+          <strong id="diskUtil">--</strong>
+          <small id="diskLatency">延迟 --</small>
+        </article>
+        <article class="myui-kpi-card myui-kpi-alert">
+          <span class="myui-kpi-label">异常记录</span>
+          <strong id="alertCount">--</strong>
+          <small id="latestHour">最近采样 --</small>
+        </article>
+      </section>
+
+      <section class="myui-screen-grid">
+        <article class="myui-panel myui-panel-wide">
+          <div class="myui-panel-header">
+            <div>
+              <h2>性能指标小时趋势</h2>
+              <p>CPU、内存、网络按小时聚合</p>
+            </div>
+          </div>
+          <div id="trendChart" class="myui-chart" role="img" aria-label="性能指标小时趋势图"></div>
+        </article>
+
+        <article class="myui-panel">
+          <div class="myui-panel-header">
+            <div>
+              <h2>主机 CPU 排行</h2>
+              <p>最近 24 小时均值</p>
+            </div>
+          </div>
+          <div id="topHostsChart" class="myui-chart" role="img" aria-label="主机 CPU 排行图"></div>
+        </article>
+
+        <article class="myui-panel">
+          <div class="myui-panel-header">
+            <div>
+              <h2>机房资源对比</h2>
+              <p>按机房聚合主机性能</p>
+            </div>
+          </div>
+          <div id="roomChart" class="myui-chart" role="img" aria-label="机房资源对比图"></div>
+        </article>
+
+        <article class="myui-panel myui-panel-wide">
+          <div class="myui-panel-header">
+            <div>
+              <h2>磁盘指标小时趋势</h2>
+              <p>延迟、利用率、读写扇区</p>
+            </div>
+          </div>
+          <div id="diskChart" class="myui-chart" role="img" aria-label="磁盘指标小时趋势图"></div>
+        </article>
+      </section>
+
+      <section class="myui-table-grid">
+        <article class="myui-panel">
+          <div class="myui-panel-header">
+            <div>
+              <h2>异常记录</h2>
+              <p>按阈值筛出的高负载记录</p>
+            </div>
+          </div>
+          <div class="myui-table-wrap">
+            <table class="myui-table">
+              <thead>
+                <tr>
+                  <th>时间</th>
+                  <th>机房</th>
+                  <th>主机</th>
+                  <th>指标</th>
+                  <th>数值</th>
+                  <th>原因</th>
+                </tr>
+              </thead>
+              <tbody id="alertsBody"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="myui-panel">
+          <div class="myui-panel-header">
+            <div>
+              <h2>最新性能明细</h2>
+              <p>最近一个小时采样结果</p>
+            </div>
+          </div>
+          <div class="myui-table-wrap">
+            <table class="myui-table">
+              <thead>
+                <tr>
+                  <th>机房</th>
+                  <th>主机</th>
+                  <th>指标</th>
+                  <th>数值</th>
+                </tr>
+              </thead>
+              <tbody id="latestBody"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script src="/vendor/echarts.min.js"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>
