@@ -201,12 +201,75 @@ function renderTopHosts(rows) {
   }, true);
 }
 
-function renderTable(tbodyId, rows, columns, emptyText) {
+function appendText(parent, className, text) {
+  const node = document.createElement("span");
+  node.className = className;
+  node.textContent = text;
+  parent.appendChild(node);
+}
+
+function createHostCell(hostname) {
+  const cell = document.createElement("span");
+  cell.className = "myui-host-cell";
+  const text = String(hostname || "--");
+  const [name, ...domainParts] = text.split(".");
+  appendText(cell, "myui-host-name", name || text);
+  if (domainParts.length) {
+    appendText(cell, "myui-host-sub", domainParts.join("."));
+  }
+  return cell;
+}
+
+function createMetricCell(name, code) {
+  const cell = document.createElement("span");
+  cell.className = "myui-metric-cell";
+  appendText(cell, "myui-metric-name", name || "--");
+  if (code) {
+    appendText(cell, "myui-metric-code", code);
+  }
+  return cell;
+}
+
+function createValuePill(value, unit) {
+  const pill = document.createElement("span");
+  pill.className = "myui-value-pill";
+  const valueText = document.createElement("span");
+  valueText.textContent = fmt(value, 2);
+  pill.appendChild(valueText);
+  if (unit) {
+    appendText(pill, "myui-value-unit", unit);
+  }
+  return pill;
+}
+
+function getAlertLevel(row) {
+  const reason = row.reason || "";
+  if (reason.includes("内存") || reason.includes("利用率")) return "critical";
+  if (reason.includes("CPU") || reason.includes("IO") || reason.includes("延迟")) return "warning";
+  return "info";
+}
+
+function renderCellContent(td, column, row) {
+  const content = column.render(row);
+  if (column.tag) {
+    const span = document.createElement("span");
+    span.className = ["myui-tag", column.tagClass?.(row)].filter(Boolean).join(" ");
+    span.textContent = content;
+    td.appendChild(span);
+  } else if (content && typeof content === "object" && "nodeType" in content) {
+    td.appendChild(content);
+  } else {
+    td.textContent = content;
+  }
+}
+
+function renderTable(tbodyId, rows, columns, emptyText, options = {}) {
   const tbody = $(tbodyId);
   const fragment = document.createDocumentFragment();
   if (!rows.length) {
     const tr = document.createElement("tr");
     const td = document.createElement("td");
+    td.className = "myui-cell-empty";
     td.colSpan = columns.length;
     td.textContent = emptyText;
     tr.appendChild(td);
@@ -214,16 +277,21 @@ function renderTable(tbodyId, rows, columns, emptyText) {
   } else {
     for (const row of rows) {
       const tr = document.createElement("tr");
+      if (options.rowClass) {
+        tr.className = options.rowClass(row);
+      }
       for (const column of columns) {
         const td = document.createElement("td");
-        if (column.tag) {
-          const span = document.createElement("span");
-          span.className = "myui-tag";
-          span.textContent = column.render(row);
-          td.appendChild(span);
-        } else {
-          td.textContent = column.render(row);
+        if (column.className) {
+          td.className = column.className;
         }
+        if (column.label) {
+          td.dataset.label = column.label;
+        }
+        if (column.title) {
+          td.title = column.title(row);
+        }
+        renderCellContent(td, column, row);
         tr.appendChild(td);
       }
       fragment.appendChild(tr);
@@ -234,21 +302,37 @@ function renderTable(tbodyId, rows, columns, emptyText) {
 
 function renderAlerts(rows) {
   renderTable("alertsBody", rows, [
-    { render: (row) => row.event_hour },
-    { render: (row) => row.room },
-    { render: (row) => row.hostname },
-    { render: (row) => `${row.metric_desc}${row.unit ? ` (${row.unit})` : ""}` },
-    { render: (row) => fmt(row.value, 2) },
-    { render: (row) => row.reason, tag: true }
-  ], "暂无异常记录");
+    { label: "时间", className: "myui-cell-time", render: (row) => row.event_hour },
+    { label: "机房", className: "myui-cell-room", render: (row) => row.room },
+    { label: "主机", className: "myui-cell-host", render: (row) => createHostCell(row.hostname), title: (row) => row.hostname },
+    {
+      label: "指标",
+      className: "myui-cell-metric",
+      render: (row) => createMetricCell(row.metric_desc)
+    },
+    { label: "数值", className: "myui-cell-value", render: (row) => createValuePill(row.value, row.unit) },
+    {
+      label: "原因",
+      className: "myui-cell-reason",
+      render: (row) => row.reason,
+      tag: true,
+      tagClass: (row) => `myui-tag-${getAlertLevel(row)}`
+    }
+  ], "暂无异常记录", {
+    rowClass: (row) => `myui-row-${getAlertLevel(row)}`
+  });
 }
 
 function renderLatestMetrics(rows) {
   renderTable("latestBody", rows, [
-    { render: (row) => row.room },
-    { render: (row) => row.hostname },
-    { render: (row) => row.metric_desc },
-    { render: (row) => `${fmt(row.avg_value, 2)} ${row.unit || ""}` }
+    { label: "机房", className: "myui-cell-room", render: (row) => row.room },
+    { label: "主机", className: "myui-cell-host", render: (row) => createHostCell(row.hostname), title: (row) => row.hostname },
+    {
+      label: "指标",
+      className: "myui-cell-metric",
+      render: (row) => createMetricCell(row.metric_desc, row.mod)
+    },
+    { label: "数值", className: "myui-cell-value", render: (row) => createValuePill(row.avg_value, row.unit) }
   ], "暂无最新采样数据");
 }
 
