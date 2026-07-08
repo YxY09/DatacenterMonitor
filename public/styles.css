@@ -17,10 +17,9 @@
   --blue: hsl(188 32% 54%);
   --purple: hsl(316 22% 58%);
   --table-surface: hsl(30 10% 11% / 0.84);
-  --table-header: hsl(30 10% 15% / 0.96);
+  --table-header: hsl(30 10% 15%);
   --table-row-alt: hsl(30 8% 14% / 0.42);
   --table-row-hover: hsl(30 10% 18% / 0.92);
-  --table-sticky: hsl(30 10% 12% / 0.98);
   --tag-muted-bg: hsl(30 10% 20% / 0.72);
   --tag-warning-bg: hsl(40 74% 55% / 0.13);
   --tag-critical-bg: hsl(6 66% 58% / 0.13);
@@ -223,7 +222,11 @@ select {
 .myui-table-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--spacing-md);
+  gap: var(--spacing-lg);
+}
+
+.myui-table-grid .myui-panel {
+  overflow: hidden;
 }
 
 .myui-panel-wide {
@@ -260,8 +263,11 @@ select {
 }
 
 .myui-table-wrap {
-  max-height: 420px;
-  overflow: auto;
+  max-height: 520px;
+  overflow-x: auto;
+  overflow-y: auto;
+  position: relative;
+  isolation: isolate;
   border: 1px solid var(--border-color);
   border-radius: var(--radius);
   background:
@@ -302,9 +308,6 @@ select {
 }
 
 .myui-table th {
-  position: sticky;
-  top: 0;
-  z-index: 3;
   background: var(--table-header);
   color: var(--text-secondary);
   font-size: 11px;
@@ -334,31 +337,6 @@ select {
 
 .myui-table tbody tr:last-child td {
   border-bottom: 0;
-}
-
-.myui-table th:first-child,
-.myui-table td:first-child {
-  position: sticky;
-  left: 0;
-}
-
-.myui-table th:first-child {
-  z-index: 4;
-  background: var(--table-header);
-}
-
-.myui-table td:first-child {
-  z-index: 2;
-  background: var(--table-sticky);
-  box-shadow: 1px 0 0 var(--border-light);
-}
-
-.myui-table tbody tr:nth-child(even) td:first-child {
-  background: hsl(30 8% 14% / 0.96);
-}
-
-.myui-table tbody tr:hover td:first-child {
-  background: var(--table-row-hover);
 }
 
 .myui-alert-table {
@@ -517,11 +495,11 @@ select {
 }
 
 .myui-row-critical td:first-child {
-  box-shadow: inset 3px 0 0 var(--error), 1px 0 0 var(--border-light);
+  box-shadow: inset 3px 0 0 var(--error);
 }
 
 .myui-row-warning td:first-child {
-  box-shadow: inset 3px 0 0 var(--warning), 1px 0 0 var(--border-light);
+  box-shadow: inset 3px 0 0 var(--warning);
 }
 
 @media (max-width: 1440px) {
