@@ -58,7 +58,7 @@ select {
 }
 
 .myui-dashboard-shell {
-  width: min(1760px, 100%);
+  width: min(2400px, 100%);
   margin: 0 auto;
   padding: 20px;
 }
@@ -502,7 +502,7 @@ select {
   box-shadow: inset 3px 0 0 var(--warning);
 }
 
-@media (max-width: 1440px) {
+@media (max-width: 2200px) {
   .myui-table-grid {
     grid-template-columns: 1fr;
   }
