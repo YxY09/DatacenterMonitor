@@ -26,6 +26,8 @@ npm install
 npm run db:up
 ```
 
+这个命令已经显式指定 Docker Compose 项目名，避免中文目录下出现 `project name must not be empty`。
+
 如果本机已经有 MySQL，可以复制 `.env.example` 为 `.env`，按自己的账号密码修改。
 
 3. 导入数据并生成汇总表

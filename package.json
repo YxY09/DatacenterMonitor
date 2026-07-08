@@ -4,7 +4,7 @@
   "description": "数据中心运行监控大屏：四张明细数据导入 MySQL 后进行可视化展示",
   "main": "src/server.js",
   "scripts": {
-    "db:up": "docker compose up -d mysql",
+    "db:up": "docker compose -p datacenter_monitor up -d mysql",
     "db:import": "node scripts/import-data.js",
     "dev": "node src/server.js",
     "start": "node src/server.js"

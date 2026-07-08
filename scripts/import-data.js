@@ -73,13 +73,13 @@ async function recreateSchema(pool) {
       location2 VARCHAR(64) NOT NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
     `CREATE TABLE mod_detail (
-      mod VARCHAR(64) NOT NULL,
+      \`mod\` VARCHAR(64) NOT NULL,
       type VARCHAR(32) NOT NULL,
       \`desc\` VARCHAR(128) NOT NULL,
       unit VARCHAR(32) NULL,
       tag VARCHAR(64) NOT NULL,
-      PRIMARY KEY (type, mod, tag),
-      KEY idx_mod_detail_mod (mod),
+      PRIMARY KEY (type, \`mod\`, tag),
+      KEY idx_mod_detail_mod (\`mod\`),
       KEY idx_mod_detail_tag (tag)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
     `CREATE TABLE disk_tsar (
@@ -87,28 +87,28 @@ async function recreateSchema(pool) {
       ts BIGINT NOT NULL,
       hostid VARCHAR(32) NOT NULL,
       type VARCHAR(32) NOT NULL,
-      mod VARCHAR(64) NOT NULL,
+      \`mod\` VARCHAR(64) NOT NULL,
       value DECIMAL(18,2) NOT NULL,
       tag VARCHAR(64) NOT NULL,
       KEY idx_disk_ts (ts),
       KEY idx_disk_host_ts (hostid, ts),
-      KEY idx_disk_metric (type, mod, tag),
+      KEY idx_disk_metric (type, \`mod\`, tag),
       CONSTRAINT fk_disk_host FOREIGN KEY (hostid) REFERENCES host_detail(hostid),
-      CONSTRAINT fk_disk_metric FOREIGN KEY (type, mod, tag) REFERENCES mod_detail(type, mod, tag)
+      CONSTRAINT fk_disk_metric FOREIGN KEY (type, \`mod\`, tag) REFERENCES mod_detail(type, \`mod\`, tag)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
     `CREATE TABLE pref_tsar (
       id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
       ts BIGINT NOT NULL,
       hostid VARCHAR(32) NOT NULL,
       type VARCHAR(32) NOT NULL,
-      mod VARCHAR(64) NOT NULL,
+      \`mod\` VARCHAR(64) NOT NULL,
       value DECIMAL(18,2) NOT NULL,
       tag VARCHAR(64) NOT NULL,
       KEY idx_pref_ts (ts),
       KEY idx_pref_host_ts (hostid, ts),
-      KEY idx_pref_metric (type, mod, tag),
+      KEY idx_pref_metric (type, \`mod\`, tag),
       CONSTRAINT fk_pref_host FOREIGN KEY (hostid) REFERENCES host_detail(hostid),
-      CONSTRAINT fk_pref_metric FOREIGN KEY (type, mod, tag) REFERENCES mod_detail(type, mod, tag)
+      CONSTRAINT fk_pref_metric FOREIGN KEY (type, \`mod\`, tag) REFERENCES mod_detail(type, \`mod\`, tag)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
   ];
 
@@ -152,18 +152,18 @@ async function createSummaryTables(pool) {
       ${hourExpr("p")} AS event_hour,
       p.hostid,
       p.type,
-      p.mod,
+      p.\`mod\`,
       p.tag,
       ROUND(AVG(p.value), 2) AS avg_value,
       ROUND(MAX(p.value), 2) AS max_value,
       ROUND(MIN(p.value), 2) AS min_value,
       COUNT(*) AS sample_cnt
     FROM pref_tsar p
-    GROUP BY dt, hour_num, event_hour, p.hostid, p.type, p.mod, p.tag
+    GROUP BY dt, hour_num, event_hour, p.hostid, p.type, p.\`mod\`, p.tag
   `);
   await pool.query("ALTER TABLE pref_hourly_summary ADD INDEX idx_pref_hour (event_hour)");
   await pool.query("ALTER TABLE pref_hourly_summary ADD INDEX idx_pref_hour_host (hostid, event_hour)");
-  await pool.query("ALTER TABLE pref_hourly_summary ADD INDEX idx_pref_hour_metric (mod, event_hour)");
+  await pool.query("ALTER TABLE pref_hourly_summary ADD INDEX idx_pref_hour_metric (`mod`, event_hour)");
 
   await pool.query(`
     CREATE TABLE disk_hourly_summary AS
@@ -173,7 +173,7 @@ async function createSummaryTables(pool) {
       ${hourExpr("d")} AS event_hour,
       d.hostid,
       d.type,
-      d.mod,
+      d.\`mod\`,
       d.tag,
       ROUND(AVG(d.value), 2) AS avg_value,
       ROUND(MAX(d.value), 2) AS max_value,
@@ -181,11 +181,11 @@ async function createSummaryTables(pool) {
       COUNT(*) AS sample_cnt,
       COUNT(DISTINCT DATE_FORMAT(${eventTimeExpr("d")}, '%Y-%m-%d %H:%i')) AS minute_sample_cnt
     FROM disk_tsar d
-    GROUP BY dt, hour_num, event_hour, d.hostid, d.type, d.mod, d.tag
+    GROUP BY dt, hour_num, event_hour, d.hostid, d.type, d.\`mod\`, d.tag
   `);
   await pool.query("ALTER TABLE disk_hourly_summary ADD INDEX idx_disk_hour (event_hour)");
   await pool.query("ALTER TABLE disk_hourly_summary ADD INDEX idx_disk_hour_host (hostid, event_hour)");
-  await pool.query("ALTER TABLE disk_hourly_summary ADD INDEX idx_disk_hour_metric (mod, event_hour)");
+  await pool.query("ALTER TABLE disk_hourly_summary ADD INDEX idx_disk_hour_metric (`mod`, event_hour)");
 
   await pool.query(`
     CREATE VIEW v_pref_hourly_readable AS
@@ -199,7 +199,7 @@ async function createSummaryTables(pool) {
       h.owner,
       h.model,
       s.hostid,
-      s.mod,
+      s.\`mod\`,
       m.\`desc\` AS metric_desc,
       COALESCE(m.unit, '') AS unit,
       s.tag,
@@ -209,7 +209,7 @@ async function createSummaryTables(pool) {
       s.sample_cnt
     FROM pref_hourly_summary s
     LEFT JOIN host_detail h ON s.hostid = h.hostid
-    LEFT JOIN mod_detail m ON s.type = m.type AND s.mod = m.mod AND s.tag = m.tag
+    LEFT JOIN mod_detail m ON s.type = m.type AND s.\`mod\` = m.\`mod\` AND s.tag = m.tag
   `);
 
   await pool.query(`
@@ -224,7 +224,7 @@ async function createSummaryTables(pool) {
       h.owner,
       h.model,
       s.hostid,
-      s.mod,
+      s.\`mod\`,
       m.\`desc\` AS metric_desc,
       COALESCE(m.unit, '') AS unit,
       s.tag,
@@ -235,7 +235,7 @@ async function createSummaryTables(pool) {
       s.minute_sample_cnt
     FROM disk_hourly_summary s
     LEFT JOIN host_detail h ON s.hostid = h.hostid
-    LEFT JOIN mod_detail m ON s.type = m.type AND s.mod = m.mod AND s.tag = m.tag
+    LEFT JOIN mod_detail m ON s.type = m.type AND s.\`mod\` = m.\`mod\` AND s.tag = m.tag
   `);
 }
 

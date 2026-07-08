@@ -16,7 +16,7 @@ SELECT 'pref_tsar', COUNT(*), 67200 FROM pref_tsar;
 SELECT
   ts,
   hostid,
-  mod,
+  `mod`,
   CAST(value AS DECIMAL(18,2)) AS value_num,
   TIMESTAMPADD(SECOND, FLOOR(ts / 1000) + 28800, '1970-01-01 00:00:00') AS event_time,
   DATE(TIMESTAMPADD(SECOND, FLOOR(ts / 1000) + 28800, '1970-01-01 00:00:00')) AS dt,
@@ -31,13 +31,13 @@ SELECT
   dt,
   hour_num AS hour,
   hostid,
-  mod,
+  `mod`,
   avg_value,
   max_value,
   min_value,
   sample_cnt
 FROM pref_hourly_summary
-ORDER BY dt, hour_num, hostid, mod
+ORDER BY dt, hour_num, hostid, `mod`
 LIMIT 20;
 
 -- 03. host001 的 cpu_usage 小时走势
@@ -48,7 +48,7 @@ SELECT
   max_value
 FROM pref_hourly_summary
 WHERE hostid = 'host001'
-  AND mod = 'cpu_usage'
+  AND `mod` = 'cpu_usage'
   AND dt = '2026-07-01'
 ORDER BY dt, hour_num;
 
