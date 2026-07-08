@@ -41,6 +41,10 @@ function fmtPercent(value) {
   return value === null || value === undefined ? "--" : `${fmt(value, 2)}%`;
 }
 
+function metricValueDigits(unit) {
+  return ["MB", "个", "pkt/s"].includes(unit) ? 0 : 2;
+}
+
 async function api(path) {
   const response = await fetch(path);
   const data = await response.json().catch(() => ({}));
@@ -110,20 +114,78 @@ function renderOverview(data) {
 }
 
 function renderTrendChart(rows) {
+  const base = baseChartOption();
   const labels = rows.map((row) => row.event_hour);
+  const visibleHours = 96;
+  const zoomStart = rows.length > visibleHours ? Math.round(((rows.length - visibleHours) / rows.length) * 100) : 0;
   const option = {
-    ...baseChartOption(),
+    ...base,
     legend: {
       top: 0,
       right: 4,
       textStyle: { color: palette.muted }
     },
-    xAxis: { ...baseChartOption().xAxis, data: labels },
+    grid: { left: 52, right: 112, top: 44, bottom: 48 },
+    tooltip: {
+      ...base.tooltip,
+      axisPointer: { type: "cross", label: { backgroundColor: "#3c3836" } }
+    },
+    dataZoom: [
+      {
+        type: "inside",
+        start: zoomStart,
+        end: 100,
+        filterMode: "none"
+      }
+    ],
+    xAxis: {
+      ...base.xAxis,
+      data: labels,
+      axisLabel: {
+        ...base.xAxis.axisLabel,
+        formatter: (value) => String(value).slice(5, 16)
+      }
+    },
+    yAxis: [
+      {
+        ...base.yAxis,
+        name: "CPU / IO",
+        max: 100,
+        nameTextStyle: { color: palette.muted },
+        axisLabel: {
+          color: palette.muted,
+          formatter: "{value}%"
+        }
+      },
+      {
+        type: "value",
+        name: "内存",
+        position: "right",
+        nameTextStyle: { color: palette.muted },
+        splitLine: { show: false },
+        axisLabel: {
+          color: palette.muted,
+          formatter: (value) => `${Math.round(value / 1024)}G`
+        }
+      },
+      {
+        type: "value",
+        name: "网络",
+        position: "right",
+        offset: 54,
+        nameTextStyle: { color: palette.muted },
+        splitLine: { show: false },
+        axisLabel: {
+          color: palette.muted,
+          formatter: (value) => `${Math.round(value)}`
+        }
+      }
+    ],
     series: [
-      { name: "CPU使用率%", type: "line", smooth: true, showSymbol: false, data: rows.map((row) => row.cpu_usage), color: palette.orange },
-      { name: "CPU等待%", type: "line", smooth: true, showSymbol: false, data: rows.map((row) => row.cpu_wait), color: palette.purple },
-      { name: "内存MB", type: "line", smooth: true, showSymbol: false, yAxisIndex: 0, data: rows.map((row) => row.mem_used), color: palette.blue },
-      { name: "入站MB/s", type: "line", smooth: true, showSymbol: false, data: rows.map((row) => row.net_in), color: palette.green }
+      { name: "CPU使用率%", type: "line", smooth: true, showSymbol: false, sampling: "lttb", yAxisIndex: 0, data: rows.map((row) => row.cpu_usage), color: palette.orange, lineStyle: { width: 2.2 } },
+      { name: "CPU等待%", type: "line", smooth: true, showSymbol: false, sampling: "lttb", yAxisIndex: 0, data: rows.map((row) => row.cpu_wait), color: palette.purple, lineStyle: { width: 2 } },
+      { name: "内存MB", type: "line", smooth: true, showSymbol: false, sampling: "lttb", yAxisIndex: 1, data: rows.map((row) => row.mem_used), color: palette.blue, lineStyle: { width: 2 }, areaStyle: { opacity: 0.08 } },
+      { name: "入站MB/s", type: "line", smooth: true, showSymbol: false, sampling: "lttb", yAxisIndex: 2, data: rows.map((row) => row.net_in), color: palette.green, lineStyle: { width: 2, type: "dashed" } }
     ]
   };
   state.charts.trend.setOption(option, true);
@@ -287,7 +349,7 @@ function createValuePill(value, unit) {
   const pill = document.createElement("span");
   pill.className = "myui-value-pill";
   const valueText = document.createElement("span");
-  valueText.textContent = fmt(value, 2);
+  valueText.textContent = fmt(value, metricValueDigits(unit));
   pill.appendChild(valueText);
   if (unit) {
     appendText(pill, "myui-value-unit", unit);
@@ -431,13 +493,15 @@ function renderAlerts(rows) {
     {
       label: "指标",
       className: "myui-cell-metric",
-      render: (row) => createMetricCell(row.metric_desc)
+      render: (row) => createMetricCell(row.metric_desc),
+      title: (row) => row.metric_desc
     },
     { label: "数值", className: "myui-cell-value", render: (row) => createValuePill(row.value, row.unit) },
     {
       label: "原因",
       className: "myui-cell-reason",
       render: (row) => row.reason,
+      title: (row) => row.reason,
       tag: true,
       tagClass: (row) => `myui-tag-${getAlertLevel(row)}`
     }
@@ -453,7 +517,8 @@ function renderLatestMetrics(rows) {
     {
       label: "指标",
       className: "myui-cell-metric",
-      render: (row) => createMetricCell(row.metric_desc, row.mod)
+      render: (row) => createMetricCell(row.metric_desc, row.mod),
+      title: (row) => `${row.metric_desc || "--"}${row.mod ? ` / ${row.mod}` : ""}`
     },
     { label: "数值", className: "myui-cell-value", render: (row) => createValuePill(row.avg_value, row.unit) }
   ], "暂无最新采样数据");

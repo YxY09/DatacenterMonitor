@@ -327,6 +327,9 @@ select {
 }
 
 .myui-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   background: var(--table-header);
   color: var(--text-secondary);
   font-size: 11px;
@@ -425,6 +428,13 @@ select {
   width: 100%;
   min-width: 0;
   padding: 4px 6px;
+}
+
+.myui-alert-table .myui-cell-host,
+.myui-alert-table .myui-cell-metric,
+.myui-latest-table .myui-cell-host,
+.myui-latest-table .myui-cell-metric {
+  line-height: 1.34;
 }
 
 .myui-cell-time {
