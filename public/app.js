@@ -130,15 +130,68 @@ function renderTrendChart(rows) {
 }
 
 function renderDiskChart(rows) {
+  const base = baseChartOption();
   const labels = rows.map((row) => row.event_hour);
+  const visibleHours = 96;
+  const zoomStart = rows.length > visibleHours ? Math.round(((rows.length - visibleHours) / rows.length) * 100) : 0;
   const option = {
-    ...baseChartOption(),
+    ...base,
     legend: { top: 0, right: 4, textStyle: { color: palette.muted } },
-    xAxis: { ...baseChartOption().xAxis, data: labels },
+    grid: { left: 48, right: 68, top: 42, bottom: 48 },
+    tooltip: {
+      ...base.tooltip,
+      axisPointer: { type: "cross", label: { backgroundColor: "#3c3836" } }
+    },
+    dataZoom: [
+      {
+        type: "inside",
+        start: zoomStart,
+        end: 100,
+        filterMode: "none"
+      }
+    ],
+    xAxis: {
+      ...base.xAxis,
+      data: labels,
+      axisLabel: {
+        ...base.xAxis.axisLabel,
+        formatter: (value) => String(value).slice(5, 16)
+      }
+    },
+    yAxis: [
+      {
+        ...base.yAxis,
+        name: "延迟 / 利用率",
+        nameTextStyle: { color: palette.muted },
+        axisLabel: { color: palette.muted }
+      },
+      {
+        type: "value",
+        name: "读写扇区",
+        nameTextStyle: { color: palette.muted },
+        splitLine: { show: false },
+        axisLabel: {
+          color: palette.muted,
+          formatter: (value) => (value >= 10000 ? `${Math.round(value / 10000)}万` : value)
+        }
+      }
+    ],
     series: [
-      { name: "磁盘延迟ms", type: "line", smooth: true, showSymbol: false, data: rows.map((row) => row.disk_latency), color: palette.orange },
-      { name: "磁盘利用率%", type: "line", smooth: true, showSymbol: false, data: rows.map((row) => row.disk_util), color: palette.red },
-      { name: "读写扇区", type: "bar", barWidth: 8, data: rows.map((row) => row.disk_rw), color: palette.blue }
+      { name: "磁盘延迟ms", type: "line", smooth: true, showSymbol: false, yAxisIndex: 0, z: 3, data: rows.map((row) => row.disk_latency), color: palette.orange },
+      { name: "磁盘利用率%", type: "line", smooth: true, showSymbol: false, yAxisIndex: 0, z: 3, data: rows.map((row) => row.disk_util), color: palette.red },
+      {
+        name: "读写扇区",
+        type: "bar",
+        yAxisIndex: 1,
+        barWidth: "42%",
+        barMaxWidth: 7,
+        barCategoryGap: "58%",
+        data: rows.map((row) => row.disk_rw),
+        color: palette.blue,
+        z: 1,
+        itemStyle: { borderRadius: [3, 3, 0, 0], opacity: 0.62 },
+        emphasis: { itemStyle: { opacity: 0.9 } }
+      }
     ]
   };
   state.charts.disk.setOption(option, true);
