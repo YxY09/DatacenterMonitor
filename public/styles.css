@@ -397,7 +397,7 @@ select {
 
 .myui-alert-table th:nth-child(6),
 .myui-alert-table td:nth-child(6) {
-  width: 112px;
+  width: 148px;
 }
 
 .myui-latest-table th:nth-child(1),
@@ -469,7 +469,7 @@ select {
 }
 
 .myui-cell-reason {
-  width: 112px;
+  width: 148px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -639,6 +639,12 @@ select {
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.myui-alert-table .myui-cell-reason .myui-tag {
+  justify-content: flex-start;
+  width: 100%;
+  padding-inline: 8px;
 }
 
 .myui-tag::before {
